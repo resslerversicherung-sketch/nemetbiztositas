@@ -1,0 +1,172 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String    @id @default(cuid())
+  email          String    @unique
+  password       String
+  name           String
+  phone          String?
+  role           String    @default("customer") // customer, admin, agent
+  language       String    @default("hu") // hu, de, ro
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  contracts      Contract[]
+  claims         Claim[]
+  mileageReports MileageReport[]
+  documents      Document[]
+  chatMessages   ChatMessage[]
+  leads          Lead[]
+  notes          Note[]
+}
+
+model Lead {
+  id          String   @id @default(cuid())
+  type        String   // kfz_calculator, evb_request, sepa_mandate, contact, claim
+  status      String   @default("open") // open, in_progress, success, failed
+  priority    String   @default("medium") // low, medium, high, urgent
+  data        String   // JSON string with form data
+  source      String?  // website, phone, email
+  language    String   @default("hu")
+  assignedTo  String?
+  user        User?    @relation(fields: [userId], references: [id])
+  userId      String?
+  notes       Note[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Note {
+  id        String   @id @default(cuid())
+  content   String
+  author    User     @relation(fields: [authorId], references: [id])
+  authorId  String
+  lead      Lead?    @relation(fields: [leadId], references: [id])
+  leadId    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Contract {
+  id              String    @id @default(cuid())
+  contractNumber  String    @unique
+  type            String    // kfz, liability, household, legal, health
+  status          String    @default("active") // active, cancelled, pending, expired
+  startDate       DateTime
+  endDate         DateTime?
+  premium         Float
+  paymentInterval String    @default("monthly") // monthly, quarterly, yearly
+  details         String    // JSON string
+  user            User      @relation(fields: [userId], references: [id])
+  userId          String
+  claims          Claim[]
+  mileageReports  MileageReport[]
+  documents       Document[]
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model Claim {
+  id            String   @id @default(cuid())
+  claimNumber   String   @unique
+  type          String   // kfz, liability, household, legal
+  status        String   @default("submitted") // submitted, in_review, approved, rejected, closed
+  description   String
+  incidentDate  DateTime
+  data          String   // JSON string with claim details
+  documents     Document[]
+  user          User     @relation(fields: [userId], references: [id])
+  userId        String
+  contract      Contract? @relation(fields: [contractId], references: [id])
+  contractId    String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model MileageReport {
+  id         String   @id @default(cuid())
+  mileage    Int
+  reportDate DateTime @default(now())
+  photoUrl   String?
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String
+  contract   Contract @relation(fields: [contractId], references: [id])
+  contractId String
+  createdAt  DateTime @default(now())
+}
+
+model Document {
+  id           String    @id @default(cuid())
+  title        String
+  fileName     String
+  fileUrl      String
+  type         String    // letter, invoice, policy, claim_doc, sepa, translation
+  translatedUrl String?  // URL to translated version
+  language     String    @default("de")
+  user         User      @relation(fields: [userId], references: [id])
+  userId       String
+  contract     Contract? @relation(fields: [contractId], references: [id])
+  contractId   String?
+  claim        Claim?    @relation(fields: [claimId], references: [id])
+  claimId      String?
+  createdAt    DateTime  @default(now())
+}
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  content   String
+  sender    String   // customer, agent, system
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model SepaMandate {
+  id               String   @id @default(cuid())
+  accountHolder    String
+  iban             String
+  bic              String
+  bankName         String
+  mandateReference String   @unique
+  signatureData    String   // base64 signature image
+  signedAt         DateTime
+  pdfUrl           String?
+  email            String
+  phone            String?
+  address          String
+  createdAt        DateTime @default(now())
+}
+
+model EvbRequest {
+  id              String   @id @default(cuid())
+  vehicleType     String
+  licensePlate    String?
+  name            String
+  email           String
+  phone           String
+  purpose         String   // new_registration, transfer, insurance_change
+  startDate       DateTime
+  details         String   // JSON
+  status          String   @default("pending") // pending, issued, expired
+  evbNumber       String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model EmailLog {
+  id        String   @id @default(cuid())
+  to        String
+  subject   String
+  body      String
+  status    String   @default("sent") // sent, failed, pending
+  type      String   // notification, welcome, claim_update, document, contract
+  createdAt DateTime @default(now())
+}
