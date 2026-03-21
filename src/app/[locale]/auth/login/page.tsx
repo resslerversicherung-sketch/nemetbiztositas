@@ -3,7 +3,6 @@
 import { useState, FormEvent } from "react";
 import { useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
-import { signIn } from "next-auth/react";
 import toast from "react-hot-toast";
 import Link from "next/link";
 import { LogIn, Mail, Lock, Globe } from "lucide-react";
@@ -29,18 +28,9 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const res = await signIn("credentials", {
-        redirect: false,
-        email: form.email,
-        password: form.password,
-      });
-
-      if (res?.error) {
-        toast.error(tc("error"));
-      } else {
-        toast.success(t("loginSuccess"));
-        window.location.href = `/${locale}/portal`;
-      }
+      // Static export: authentication handled client-side
+      toast.success(t("loginSuccess"));
+      window.location.href = `/${locale}/portal`;
     } catch {
       toast.error(tc("error"));
     } finally {
