@@ -32,7 +32,7 @@ export default function AdminLoginPage() {
     if (form.username === ADMIN_USERNAME && form.password === ADMIN_PASSWORD) {
       sessionStorage.setItem("adminAuth", "true");
       toast.success("Login erfolgreich!");
-      window.location.href = `/${locale}/admin`;
+      window.location.href = `/nemetbiztositas/${locale}/admin`;
     } else {
       setError("Falscher Benutzername oder Passwort.");
       toast.error("Login fehlgeschlagen");

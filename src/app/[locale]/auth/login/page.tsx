@@ -30,7 +30,7 @@ export default function LoginPage() {
     try {
       // Static export: authentication handled client-side
       toast.success(t("loginSuccess"));
-      window.location.href = `/${locale}/portal`;
+      window.location.href = `/nemetbiztositas/${locale}/portal`;
     } catch {
       toast.error(tc("error"));
     } finally {
