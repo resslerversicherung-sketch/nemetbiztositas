@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Shield, Phone, Mail, MapPin } from "lucide-react";
+import { Shield, Phone, Mail, MapPin, Lock } from "lucide-react";
 
 export default function Footer() {
   const t = useTranslations("footer");
@@ -70,8 +70,15 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-500">
+        <div className="border-t border-gray-800 mt-8 pt-8 flex flex-col items-center gap-4 text-sm text-gray-500">
           <p>{t("copyright")}</p>
+          <Link
+            href={`/${currentLocale}/auth/admin-login`}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-gray-800 text-gray-400 rounded-lg hover:bg-gray-700 hover:text-white transition-colors text-xs"
+          >
+            <Lock className="w-3.5 h-3.5" />
+            Admin Login
+          </Link>
         </div>
       </div>
     </footer>
